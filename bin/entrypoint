@@ -1,0 +1,48 @@
+#!/bin/sh
+
+CFG_DIR="/etc/isso"
+LOG_DIR="/data/isso/log"
+DB_DIR="/data/isso/db"
+
+checkFolders(){
+	if [ ! -d "$CFG_DIR" ]; then
+		mkdir -p "$CFG_DIR" \
+			|| ( printf "\nCannot create config folder %s" "$CFG_DIR"; exit 1 )
+	fi
+	if [ ! -d "$DB_DIR" ]; then
+		mkdir -p "$DB_DIR" \
+			|| ( printf "\nCannot create db folder %s" "$DB_DIR"; exit 1 )
+	fi
+	if [ ! -d "$LOG_DIR" ]; then
+		mkdir -p "$LOG_DIR" \
+			|| ( printf "\nCannot create logs folder %s" "$LOG_DIR"; exit 1 )
+	fi
+	# SET PERMISSIONS
+	chown -R "${APP_UID}:${APP_GUID}" "$CFG_DIR" "$LOG_DIR" "$DB_DIR" \
+		|| ( printf "\nCannot take ownership on isso folders (%s %s %s)" "$CFG_DIR" "$LOG_DIR" "$DB_DIR"; exit 1 )
+}
+
+processJ2Templates() {
+	cp -R /templates/* "$CFG_DIR"
+	for f in $CFG_DIR/*.j2 ; do
+	  printf "\nEvaluating template\n\tSource: %s\n\tDest: %s" "$f" "${f%.j2}"
+	  j2 "$f" > "${f%.j2}"
+	  rm -f "$f"
+	done
+}
+
+init(){
+	if [ "$(id -u)" = '0' ]; then
+		if [ "$1" = 'isso' ]; then
+			exec su-exec "$APP_USER:$APP_GROUP" "$@"
+		else
+			exec "$@"
+		fi
+	fi
+}
+
+if checkFolders && processJ2Templates; then
+	printf "\nInit done!\n---------------------------\n"
+	init "$@"
+fi
+
