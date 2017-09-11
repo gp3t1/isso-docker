@@ -19,12 +19,12 @@ ENV APP_GROUP="$APP_USER"	APP_GUID=501
 
 ## ISSO CONFIGURATION
 ENV DB_NAME="comments.db" \
-		NAME="ISSO" \
+		NAME="isso_comments" \
 		WEBSITE="https://my-domain/" \
 		LISTEN="http://localhost:8100" \
 		RELOAD="off" \
 		PROFILE_ENABLE="off" \
-		HASH_SALT=""
+		HASH_SALT="Eech7co8Ohloopo9Ol6baimi"
 ENV	NOTIFY="stdout" \
 		LOG_NAME=""
 ENV	MOD_ENABLE="false" \
@@ -42,7 +42,6 @@ ENV	GUARD_ENABLE="true" \
 		RATE_LIMIT="3" \
 		DIRECT_REPLY="3" \
 		REPLY_SELF="false" \
-		REQUIRE_AUTHOR="false" \
 		REQUIRE_EMAIL="false"
 ENV	MARKUP_OPTIONS="TABLES, FENCED_CODE, AUTOLINK, STRIKETHROUGH, NO_INTRA_EMPHASIS" \
 		MARKUP_ALLOW_ELTS="img" \
@@ -59,8 +58,6 @@ RUN  setAppUser \
 			python \
 			py-setuptools \
 			sqlite \
-			# libressl \
-			# ca-certificates \
 	&& pip install --no-cache cffi \
 	&& pip install --no-cache misaka \
 	&& pip install --no-cache "isso==${VERSION}" \
@@ -68,10 +65,10 @@ RUN  setAppUser \
 	&& apk del build-dependencies \
 	&& rm -rf /tmp/*
 
+## RETRIEVE TEMPLATES & SCRIPTS
 COPY templates/* /templates/
 COPY bin/* /usr/bin/
 RUN  chmod 755 /usr/bin/entrypoint
 
-# CMD ["/usr/local/bin/umurmurd","-d","-c","/etc/umurmur/umurmurd.conf"]
 ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/entrypoint"]
 CMD ["isso", "-c", "/etc/isso/isso.conf", "run"]
