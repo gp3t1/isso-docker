@@ -4,7 +4,7 @@ LABEL maintainer="Jeremy PETIT <jeremy.petit@gmail.com>" \
 			description="alpine-based isso image - commenting server"
 
 ## ISSO BUILD SETTINGS
-ARG VERSION="0.10.5"
+ARG VERSION="0.10.6"
 # ARG MISAKA_VERSION="1.0.2"
 
 ## VOLUMES

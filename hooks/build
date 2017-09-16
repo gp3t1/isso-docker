@@ -1,0 +1,40 @@
+#!/bin/bash
+# set  -x
+
+ISSO_VERSIONS=($(curl -s https://pypi.python.org/pypi/isso/json | grep -E "[ ]*\"[0-9.]*\":[ ]*\[$" | awk -F'"' '{ print $2 }' | sort -V | tail -4))
+
+printf "\n##########################"
+printf "\n##  Start Custom Build  ##"
+printf "\n##########################"
+
+if [[ "$SOURCE_BRANCH" =~ ^[0-9.]+$ ]]; then
+	printf "\n[RELEASE] Build for Repo: %s" 	"$DOCKER_REPO"
+else
+	if [[ "$SOURCE_BRANCH" == "master" ]]; then
+		printf "\n[MASTER] Not Building from master"
+		exit 0
+	fi
+	printf "\n[TEST] Build for Repo: %s" 	"$DOCKER_REPO"
+fi
+printf "\n-- SOURCE_BRANCH	: %s" 				"$SOURCE_BRANCH"
+printf "\n-- SOURCE_COMMIT	: %s (%s)" 		"$SOURCE_COMMIT" 	"$COMMIT_MSG"
+printf "\n-- REPO_NAME 			: %s" 				"$REPO_NAME"
+printf "\n-- IMAGE_NAME 		: %s (%s)" 		"$IMAGE_NAME" 		"$CACHE_TAG"
+printf "\n--------------------------------\n"
+
+
+buildIsso(){
+	ISSO_VERSION="$1"
+	NAME="$REPO_NAME:$SOURCE_BRANCH-$ISSO_VERSION"
+
+	printf "\n\n## Building %s ##\n" "$NAME"
+	docker build --build-arg VERSION="$ISSO_VERSION" -t "$NAME" . \
+		&& echo "$NAME" >> hooks/names \
+		|| (printf "\nCannot build %s" "$NAME"; exit 1)
+}
+
+echo "" > hooks/names
+for t in "${ISSO_VERSIONS[@]}"; do
+	buildIsso "$t"
+done
+

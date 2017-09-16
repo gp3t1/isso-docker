@@ -1,0 +1,31 @@
+#!/bin/bash
+# set  -x
+
+printf "\n#########################"
+printf "\n##  Start Custom Push  ##"
+printf "\n#########################"
+
+if [[ ! -f hooks/names ]]; then
+	printf "\nNothing to Push\n"
+	exit 0
+fi
+
+REF_ISSO_VERSION="$(grep -E "^ARG VERSION=.*$" ./Dockerfile | awk -F'=' '{ print $2 }' | tr -d '"' )"
+while read line  
+do
+	if [ -n "$line" ]; then
+		printf "\nPushing %s...\n" "$line"
+		docker push "$line" || (printf "\nCannot push %s" "$line"; exit 1)
+		if [[ "${SOURCE_BRANCH}" =~ ^[0-9.]+$ ]] && [[ "$line" =~ .*-${REF_ISSO_VERSION} ]]; then
+			ALT_NAMES=(
+				"${REPO_NAME}:latest"
+				"${REPO_NAME}:${SOURCE_BRANCH}")
+			for ALT_NAME in "${ALT_NAMES[@]}"; do
+				docker tag "$line" "${ALT_NAME}" 	|| (printf "\nCannot tag %s as %s" "$line" "${ALT_NAME}"; exit 1)
+				printf "\nPushing %s as %s...\n" "$line" "${ALT_NAME}"
+	    	docker push "${ALT_NAME}" 				|| (printf "\nCannot push %s" "${ALT_NAME}"; exit 1)
+			done
+		fi
+	fi
+done < hooks/names
+rm hooks/names
