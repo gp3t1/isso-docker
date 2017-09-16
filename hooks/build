@@ -24,6 +24,7 @@ printf "\n--------------------------------\n"
 
 
 buildIsso(){
+	build_start=$(date +%s)
 	ISSO_VERSION="$1"
 	NAME="$REPO_NAME:$SOURCE_BRANCH-$ISSO_VERSION"
 
@@ -31,6 +32,7 @@ buildIsso(){
 	docker build --build-arg VERSION="$ISSO_VERSION" -t "$NAME" . \
 		&& echo "$NAME" >> hooks/names \
 		|| (printf "\nCannot build %s" "$NAME"; exit 1)
+	printf "\n## Build time for %s : %ss\n" "$NAME" "$(( $(date +%s) - build_start ))"
 }
 
 echo "" > hooks/names
