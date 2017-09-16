@@ -34,7 +34,8 @@ processJ2Templates() {
 init(){
 	if [ "$(id -u)" = '0' ]; then
 		if [ "$1" = 'isso' ]; then
-			exec su-exec "$APP_USER:$APP_GROUP" "$@"
+			launch "$@"
+			# exec su-exec "$APP_USER:$APP_GROUP" "$@"
 		else
 			exec "$@"
 		fi

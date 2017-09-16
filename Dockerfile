@@ -1,4 +1,4 @@
-FROM gp3t1/alpine:0.3
+FROM gp3t1/alpine:0.7
 
 LABEL maintainer="Jeremy PETIT <jeremy.petit@gmail.com>" \
 			description="alpine-based isso image - commenting server"
@@ -70,5 +70,5 @@ COPY templates/* /templates/
 COPY bin/* /usr/bin/
 RUN  chmod 755 /usr/bin/entrypoint
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/entrypoint"]
+ENTRYPOINT ["/usr/bin/entrypoint"]
 CMD ["isso", "-c", "/etc/isso/isso.conf", "run"]
