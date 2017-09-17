@@ -1,4 +1,4 @@
-FROM gp3t1/alpine:0.7
+FROM gp3t1/alpine:0.7.1
 
 LABEL maintainer="Jeremy PETIT <jeremy.petit@gmail.com>" \
 			description="alpine-based isso image - commenting server"
